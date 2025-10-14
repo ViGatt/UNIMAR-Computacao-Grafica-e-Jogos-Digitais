@@ -1,6 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
-
 public class PontoDePesca : MonoBehaviour
 {
     [Header("Configurações do Peixe")]
@@ -8,7 +6,7 @@ public class PontoDePesca : MonoBehaviour
     [SerializeField] private float tamanhoDaZona = 100f;
 
     [Tooltip("Quantos pontos este peixe vale.")]
-    [SerializeField] private int valorEmPontos = 10; 
+    [SerializeField] private int valorEmPontos = 10;
 
     private void OnMouseDown()
     {
@@ -29,13 +27,23 @@ public class PontoDePesca : MonoBehaviour
         {
             Debug.Log("Sucesso! O peixe foi pego, adicionando " + valorEmPontos + " pontos.");
 
+            // Adiciona os pontos (usando o nome do seu script, 'Score')
             Score.Instance.AddScore(valorEmPontos);
+
+            // Avisa o Spawner para criar um novo peixe em algum lugar
+            if (FishSpawner.Instance != null)
+            {
+                FishSpawner.Instance.PeixeFoiPescado();
+            }
+            else
+            {
+                Debug.LogWarning("FishSpawner não encontrado na cena. Nenhum peixe novo será criado.");
+            }
 
             Destroy(gameObject);
         }
         else
         {
-            
             Debug.Log("Falhou! O peixe escapou.");
             gameObject.SetActive(true);
         }
