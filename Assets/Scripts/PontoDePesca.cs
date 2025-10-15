@@ -10,6 +10,8 @@ public class PontoDePesca : MonoBehaviour
 
     private void OnMouseDown()
     {
+        if (GameManager.Instance.JogoTerminou) return;
+
         Debug.Log("Clique detectado em: " + gameObject.name + ". Chamando o minigame.", gameObject);
         if (FishingMinigame.Instance == null)
         {

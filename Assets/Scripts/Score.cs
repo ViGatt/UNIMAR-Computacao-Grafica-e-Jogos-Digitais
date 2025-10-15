@@ -1,11 +1,11 @@
 using UnityEngine;
-using TMPro; 
+using TMPro;
 
 public class Score : MonoBehaviour
 {
     public static Score Instance { get; private set; }
 
-    [SerializeField] private TextMeshProUGUI scoreText; 
+    [SerializeField] private TextMeshProUGUI scoreText;
 
     private int score = 0;
 
@@ -33,12 +33,18 @@ public class Score : MonoBehaviour
         Debug.Log("Pontuação atual: " + score);
     }
 
+
+
     private void UpdateScoreText()
     {
         if (scoreText != null)
         {
-            
             scoreText.text = "Pontos: " + score;
         }
+    }
+
+    public int GetScore()
+    {
+        return score;
     }
 }
