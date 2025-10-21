@@ -1,4 +1,5 @@
 using UnityEngine;
+
 public class PontoDePesca : MonoBehaviour
 {
     [Header("Configurações do Peixe")]
@@ -8,14 +9,21 @@ public class PontoDePesca : MonoBehaviour
     [Tooltip("Quantos pontos este peixe vale.")]
     [SerializeField] private int valorEmPontos = 10;
 
-    private void OnMouseDown()
-    {
-        if (GameManager.Instance.JogoTerminou) return;
 
-        Debug.Log("Clique detectado em: " + gameObject.name + ". Chamando o minigame.", gameObject);
+    public void IniciarPesca()
+    {
+        // Verifica se o jogo já terminou
+        if (GameManager.Instance != null && GameManager.Instance.JogoTerminou)
+        {
+            Debug.LogWarning("Clique no peixe IGNORADO porque o jogo já terminou.");
+            return;
+        }
+
+        // A lógica que estava no OnMouseDown vem para aqui
+        Debug.Log("Clique detectado (via Raycast) em: " + gameObject.name + ". Chamando o minigame.", gameObject);
         if (FishingMinigame.Instance == null)
         {
-            Debug.LogError("ERRO: O peixe tentou iniciar o minigame, mas não encontrou uma Instância do FishingMinigame. O gerenciador foi destruído ou não existe?");
+            Debug.LogError("ERRO: O peixe tentou iniciar o minigame, mas não encontrou uma Instância do FishingMinigame.");
             return;
         }
 
@@ -28,18 +36,11 @@ public class PontoDePesca : MonoBehaviour
         if (sucesso)
         {
             Debug.Log("Sucesso! O peixe foi pego, adicionando " + valorEmPontos + " pontos.");
-
-            // Adiciona os pontos (usando o nome do seu script, 'Score')
             Score.Instance.AddScore(valorEmPontos);
 
-            // Avisa o Spawner para criar um novo peixe em algum lugar
             if (FishSpawner.Instance != null)
             {
                 FishSpawner.Instance.PeixeFoiPescado();
-            }
-            else
-            {
-                Debug.LogWarning("FishSpawner não encontrado na cena. Nenhum peixe novo será criado.");
             }
 
             Destroy(gameObject);
