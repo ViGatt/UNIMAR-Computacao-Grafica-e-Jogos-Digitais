@@ -1,17 +1,16 @@
-// PlayerClickHandler.cs (A VERSÃO FINAL CORRIGIDA)
 using UnityEngine;
 using UnityEngine.EventSystems;
-using System.Collections.Generic; // Precisamos disto para usar "List"
+using System.Collections.Generic;
 
 public class PlayerClickHandler : MonoBehaviour
 {
     private Camera mainCamera;
-    private int uiLayer; // Vamos guardar o número da camada "UI"
+    private int uiLayer;
 
     void Start()
     {
         mainCamera = GetComponent<Camera>();
-        uiLayer = LayerMask.NameToLayer("UI"); 
+        uiLayer = LayerMask.NameToLayer("UI");
 
         if (mainCamera == null)
         {
@@ -21,30 +20,31 @@ public class PlayerClickHandler : MonoBehaviour
 
     void Update()
     {
+        // VERIFICAÇÃO 0: Se o minigame de pesca está ativo, IGNORA QUALQUER CLIQUE e para aqui.
+        if (FishingMinigame.Instance != null && FishingMinigame.Instance.IsMinigameActive)
+        {
+            return;
+        }
+
         // 1. O clique foi pressionado?
         if (Input.GetMouseButtonDown(0))
         {
-
+            // Verificação 1: O clique foi na UI (botões)?
             PointerEventData pointerData = new PointerEventData(EventSystem.current);
             pointerData.position = Input.mousePosition;
             List<RaycastResult> results = new List<RaycastResult>();
             EventSystem.current.RaycastAll(pointerData, results);
 
-            // 2. A UI foi atingida?
             if (results.Count > 0)
             {
-                // 3. O objeto que foi atingido está na camada "UI"?
                 if (results[0].gameObject.layer == uiLayer)
                 {
-                    // 4. SIM, é um botão ou painel. Bloqueia o clique.
                     Debug.LogWarning("Clique BLOQUEADO pela UI: <b>" + results[0].gameObject.name + "</b>", results[0].gameObject);
-                    return; 
+                    return; // É um botão, para aqui.
                 }
-
-                Debug.Log("EventSystem atingiu um objeto 3D (" + results[0].gameObject.name + "), mas não é UI. A permitir o clique.");
             }
 
-
+            // Verificação 2: O clique foi no mundo 3D
             Debug.Log("Clique no Jogo. Disparando Physics.Raycast...");
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
 

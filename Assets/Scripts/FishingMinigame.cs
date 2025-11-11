@@ -7,7 +7,7 @@ public class FishingMinigame : MonoBehaviour
     public static FishingMinigame Instance { get; private set; }
 
     [Header("Elementos da UI")]
-    public GameObject painelMinigame; 
+    public GameObject painelMinigame;
     public RectTransform barraPrincipal;
     public RectTransform barraJogador;
     public RectTransform zonaDeCaptura;
@@ -17,11 +17,13 @@ public class FishingMinigame : MonoBehaviour
     private float velocidadeZonaDeCaptura;
     private float duracaoDoMinigame = 10f;
 
+    public bool IsMinigameActive { get; private set; } 
     private float tempoRestante;
     private Action<bool> onMinigameComplete;
 
     void Awake()
     {
+        IsMinigameActive = false; 
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -33,7 +35,7 @@ public class FishingMinigame : MonoBehaviour
 
         if (painelMinigame != null)
         {
-            painelMinigame.SetActive(false); 
+            painelMinigame.SetActive(false);
         }
     }
 
@@ -70,6 +72,7 @@ public class FishingMinigame : MonoBehaviour
 
     public void IniciarMinigame(float velocidadePeixe, float tamanhoZona, Action<bool> callback)
     {
+        IsMinigameActive = true; 
         this.velocidadeZonaDeCaptura = velocidadePeixe;
         zonaDeCaptura.sizeDelta = new Vector2(zonaDeCaptura.sizeDelta.x, tamanhoZona);
         this.onMinigameComplete = callback;
@@ -81,6 +84,8 @@ public class FishingMinigame : MonoBehaviour
 
     private void FinalizarMinigame(bool sucesso)
     {
+        IsMinigameActive = false;
+
         Debug.Log(sucesso ? "Você pescou o peixe!" : "O peixe escapou!");
         painelMinigame.SetActive(false);
 
