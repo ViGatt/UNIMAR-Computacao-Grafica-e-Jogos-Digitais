@@ -20,7 +20,6 @@ public class FishSpawner : MonoBehaviour
     {
         if (peixePrefabs.Length == 0)
         {
-            Debug.LogError("ERRO NO SPAWNER: Nenhum prefab de peixe foi atribuído no Inspector!", this);
             return;
         }
 
@@ -32,25 +31,17 @@ public class FishSpawner : MonoBehaviour
 
     public void PeixeFoiPescado()
     {
-        Debug.Log("<color=yellow>SPAWNER:</color> Recebi o aviso de que um peixe foi pescado. A iniciar contagem para criar um novo.", this);
-
         StartCoroutine(RespawnPeixeComDelay(5f));
     }
 
     private IEnumerator RespawnPeixeComDelay(float delay)
     {
-        Debug.Log("<color=yellow>SPAWNER:</color> Coroutine iniciada. A esperar " + delay + " segundos...", this);
-
         yield return new WaitForSeconds(delay);
-
-        Debug.Log("<color=yellow>SPAWNER:</color> Tempo de espera terminado. A criar um novo peixe agora.", this);
         SpawnPeixe();
     }
 
     private void SpawnPeixe()
     {
-        Debug.Log("<color=green>SPAWNER:</color> A executar o método SpawnPeixe().", this);
-
         if (peixePrefabs.Length == 0) return;
 
         GameObject peixeAleatorio = peixePrefabs[Random.Range(0, peixePrefabs.Length)];
@@ -59,8 +50,6 @@ public class FishSpawner : MonoBehaviour
         Vector3 posicaoDeSpawn = new Vector3(xPos, 0, zPos) + transform.position;
 
         Instantiate(peixeAleatorio, posicaoDeSpawn, Quaternion.identity);
-
-        Debug.Log("<color=green>SPAWNER:</color> Peixe criado com sucesso na posição " + posicaoDeSpawn, this);
     }
 
     private void OnDrawGizmosSelected()
