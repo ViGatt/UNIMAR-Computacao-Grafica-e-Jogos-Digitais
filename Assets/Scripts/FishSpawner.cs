@@ -1,4 +1,3 @@
-// FishSpawner.cs (VERSÃO DE DIAGNÓSTICO)
 using System.Collections;
 using UnityEngine;
 
@@ -33,28 +32,23 @@ public class FishSpawner : MonoBehaviour
 
     public void PeixeFoiPescado()
     {
-        // LOG 1: Confirma que o Spawner recebeu a chamada
         Debug.Log("<color=yellow>SPAWNER:</color> Recebi o aviso de que um peixe foi pescado. A iniciar contagem para criar um novo.", this);
 
-        // Espera 5 segundos e cria um novo peixe para repor o que foi pescado
         StartCoroutine(RespawnPeixeComDelay(5f));
     }
 
     private IEnumerator RespawnPeixeComDelay(float delay)
     {
-        // LOG 2: Confirma que a Coroutine começou
         Debug.Log("<color=yellow>SPAWNER:</color> Coroutine iniciada. A esperar " + delay + " segundos...", this);
 
         yield return new WaitForSeconds(delay);
 
-        // LOG 3: Confirma que a espera terminou e vai chamar o SpawnPeixe
         Debug.Log("<color=yellow>SPAWNER:</color> Tempo de espera terminado. A criar um novo peixe agora.", this);
         SpawnPeixe();
     }
 
     private void SpawnPeixe()
     {
-        // LOG 4: Confirma que o método para criar o peixe foi chamado
         Debug.Log("<color=green>SPAWNER:</color> A executar o método SpawnPeixe().", this);
 
         if (peixePrefabs.Length == 0) return;
@@ -66,7 +60,6 @@ public class FishSpawner : MonoBehaviour
 
         Instantiate(peixeAleatorio, posicaoDeSpawn, Quaternion.identity);
 
-        // LOG 5: Confirma que o peixe foi instanciado
         Debug.Log("<color=green>SPAWNER:</color> Peixe criado com sucesso na posição " + posicaoDeSpawn, this);
     }
 

@@ -1,13 +1,13 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using TMPro; 
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
     [Header("Configurações do Jogo")]
-    [SerializeField] private float tempoDeJogo = 60f; 
+    [SerializeField] private float tempoDeJogo = 60f;
 
     [Header("Referências da UI")]
     [SerializeField] private TextMeshProUGUI textoDoTimer;
@@ -15,7 +15,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI textoPontuacaoFinal;
 
     private float tempoRestante;
-    public bool JogoTerminou { get; private set; } 
+    public bool JogoTerminou { get; private set; }
+
+    private bool aguardandoFimDoMinigame = false;
 
     void Awake()
     {
@@ -26,30 +28,56 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         JogoTerminou = false;
+        aguardandoFimDoMinigame = false; 
         tempoRestante = tempoDeJogo;
-        painelFimDeJogo.SetActive(false); 
-        Time.timeScale = 1f; 
+        painelFimDeJogo.SetActive(false);
+        Time.timeScale = 1f;
     }
 
     void Update()
     {
         if (JogoTerminou) return;
 
+        if (aguardandoFimDoMinigame)
+        {
+            if (FishingMinigame.Instance != null && !FishingMinigame.Instance.IsMinigameActive)
+            {
+                FimDeJogo();
+            }
+            return;
+        }
+
         tempoRestante -= Time.deltaTime;
 
         if (tempoRestante <= 0)
         {
             tempoRestante = 0;
-            FimDeJogo();
+
+            if (FishingMinigame.Instance != null && FishingMinigame.Instance.IsMinigameActive)
+            {
+                aguardandoFimDoMinigame = true;
+                Debug.Log("Tempo acabou, mas jogador está a pescar. Aguardando minigame...");
+            }
+            else
+            {
+                FimDeJogo();
+            }
         }
 
-        AtualizarTextoTimer();
+        if (!aguardandoFimDoMinigame)
+        {
+            AtualizarTextoTimer();
+        }
+        else
+        {
+            textoDoTimer.text = "00:00";
+        }
     }
 
     private void FimDeJogo()
     {
-        JogoTerminou = true;
-        painelFimDeJogo.SetActive(true); 
+        JogoTerminou = true; 
+        painelFimDeJogo.SetActive(true);
 
         if (Score.Instance != null)
         {
@@ -69,7 +97,6 @@ public class GameManager : MonoBehaviour
     public void ReiniciarJogo()
     {
         Time.timeScale = 1f;
-
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }
