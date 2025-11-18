@@ -94,6 +94,17 @@ public class GameManager : MonoBehaviour
         textoDoTimer.text = string.Format("{0:00}:{1:00}", minutos, segundos);
     }
 
+    public void AdicionarTempo(float tempoParaAdicionar)
+    {
+        if (JogoTerminou || aguardandoFimDoMinigame) return;
+
+        tempoRestante += tempoParaAdicionar;
+
+        AtualizarTextoTimer();
+
+        Debug.Log("+" + tempoParaAdicionar + " segundos! Tempo restante: " + tempoRestante);
+    }
+
     public void ReiniciarJogo()
     {
         Time.timeScale = 1f;
