@@ -12,11 +12,17 @@ public class PontoDePesca : MonoBehaviour
     [SerializeField] private AudioClip somDeClique;
 
     [Header("Configurações Especiais")]
+    [Tooltip("Marque isto se for um peixe de bónus ou armadilha (clique instantâneo).")]
     [SerializeField] private bool ehEspecial = false;
+
+    [Tooltip("Use valores positivos para BÓNUS (ex: 15) e negativos para DEBUFF (ex: -5).")]
     [SerializeField] private float tempoParaAdicionar = 15f;
 
     [Tooltip("Se for especial, quantos segundos ele fica na tela antes de sumir.")]
     [SerializeField] private float tempoDeVida = 5f;
+
+    [Tooltip("Marque isto se este peixe especial deve spawnar misturado com os peixes normais.")]
+    [SerializeField] private bool fazParteDoSpawnNormal = false;
 
     private void Start()
     {
@@ -28,13 +34,23 @@ public class PontoDePesca : MonoBehaviour
 
     private void SumirSozinho()
     {
+        AvisarSpawnerParaRepor();
+        Destroy(gameObject);
+    }
+
+    private void AvisarSpawnerParaRepor()
+    {
         if (FishSpawner.Instance != null)
         {
-            FishSpawner.Instance.PeixeEspecialFoiPescado();
+            if (fazParteDoSpawnNormal)
+            {
+                FishSpawner.Instance.PeixeNormalFoiPescado();
+            }
+            else
+            {
+                FishSpawner.Instance.PeixeEspecialFoiPescado();
+            }
         }
-
-
-        Destroy(gameObject);
     }
 
     public void IniciarPesca()
@@ -51,11 +67,7 @@ public class PontoDePesca : MonoBehaviour
                 GameManager.Instance.AdicionarTempo(tempoParaAdicionar);
             }
 
-            if (FishSpawner.Instance != null)
-            {
-                FishSpawner.Instance.PeixeEspecialFoiPescado();
-            }
-
+            AvisarSpawnerParaRepor(); 
             Destroy(gameObject);
         }
         else
@@ -81,7 +93,6 @@ public class PontoDePesca : MonoBehaviour
             {
                 FishSpawner.Instance.PeixeNormalFoiPescado();
             }
-
             Destroy(gameObject);
         }
         else

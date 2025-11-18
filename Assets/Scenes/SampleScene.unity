@@ -1712,6 +1712,7 @@ MonoBehaviour:
   peixePrefabs:
   - {fileID: 7229245017435699954}
   - {fileID: 8041222419257793080}
+  - {fileID: 7219993877800167232, guid: 8f918227c4d46b945a7d2c1418014751, type: 3}
   quantidadeInicialDePeixes: 15
   areaDeSpawn: {x: 50, y: 50}
   peixeEspecialPrefab: {fileID: 8394414595126737904, guid: 6bd40f8e635c4da43a61aaaa4d50fb37, type: 3}
@@ -5888,7 +5889,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &989215361
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -30778,6 +30779,7 @@ MonoBehaviour:
   ehEspecial: 0
   tempoParaAdicionar: 15
   tempoDeVida: 5
+  fazParteDoSpawnNormal: 0
 --- !u!1 &4689779529033944666
 GameObject:
   m_ObjectHideFlags: 0
@@ -31158,6 +31160,7 @@ MonoBehaviour:
   ehEspecial: 0
   tempoParaAdicionar: 15
   tempoDeVida: 5
+  fazParteDoSpawnNormal: 0
 --- !u!4 &8022073485739445076
 Transform:
   m_ObjectHideFlags: 0
@@ -31283,6 +31286,7 @@ MonoBehaviour:
   ehEspecial: 0
   tempoParaAdicionar: 15
   tempoDeVida: 5
+  fazParteDoSpawnNormal: 0
 --- !u!4 &8255566782733984660
 Transform:
   m_ObjectHideFlags: 0
@@ -33433,6 +33437,7 @@ MonoBehaviour:
   ehEspecial: 0
   tempoParaAdicionar: 15
   tempoDeVida: 5
+  fazParteDoSpawnNormal: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
