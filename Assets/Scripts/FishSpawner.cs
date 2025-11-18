@@ -17,10 +17,10 @@ public class FishSpawner : MonoBehaviour
     [Header("Verificação de Obstáculos")]
     [Tooltip("Quais camadas são consideradas obstáculos (pedras, troncos, etc).")]
     [SerializeField] private LayerMask camadaObstaculos;
-    [Tooltip("O espaço vazio necessário ao redor do peixe.")]
     [SerializeField] private float raioDeEspaco = 1f;
-    [Tooltip("Quantas vezes tentar achar um lugar livre antes de desistir.")]
     [SerializeField] private int maxTentativas = 10;
+
+    private GameObject peixeEspecialAtual;
 
     void Awake()
     {
@@ -40,24 +40,13 @@ public class FishSpawner : MonoBehaviour
 
         if (peixeEspecialPrefab != null)
         {
-            StartCoroutine(SpawnEspecialLoop());
-        }
-    }
-
-    private IEnumerator SpawnEspecialLoop()
-    {
-        while (true)
-        {
-            if (GameManager.Instance == null || !GameManager.Instance.JogoTerminou)
-            {
-                SpawnPeixe(peixeEspecialPrefab);
-            }
-            yield return new WaitForSeconds(intervaloSpawnEspecial);
+            CriarPeixeEspecial();
         }
     }
 
     public void PeixeEspecialFoiPescado()
     {
+        peixeEspecialAtual = null;
         StartCoroutine(RespawnPeixeEspecialComDelay());
     }
 
@@ -67,8 +56,21 @@ public class FishSpawner : MonoBehaviour
 
         if (GameManager.Instance != null && !GameManager.Instance.JogoTerminou)
         {
-            SpawnPeixe(peixeEspecialPrefab);
+            CriarPeixeEspecial();
         }
+    }
+
+    private void CriarPeixeEspecial()
+    {
+        if (peixeEspecialAtual != null) return; 
+
+        if (peixeEspecialPrefab == null)
+        {
+            Debug.LogError("ERRO: Prefab do Peixe Especial não atribuído no Inspector!");
+            return;
+        }
+
+        peixeEspecialAtual = SpawnPeixe(peixeEspecialPrefab);
     }
 
     public void PeixeNormalFoiPescado()
@@ -85,13 +87,21 @@ public class FishSpawner : MonoBehaviour
     private void SpawnPeixeNormal()
     {
         if (peixePrefabs.Length == 0) return;
+
         GameObject peixeAleatorio = peixePrefabs[Random.Range(0, peixePrefabs.Length)];
+
+        if (peixeAleatorio == null)
+        {
+            Debug.LogError("ERRO CRÍTICO: Um item na lista 'Peixe Prefabs' está vazio ou foi destruído! Certifique-se de arrastar os arquivos da pasta PROJECT, e não objetos da CENA.");
+            return;
+        }
+
         SpawnPeixe(peixeAleatorio);
     }
 
-    private void SpawnPeixe(GameObject peixePrefab)
+    private GameObject SpawnPeixe(GameObject peixePrefab)
     {
-        if (peixePrefab == null) return;
+        if (peixePrefab == null) return null;
 
         Vector3 melhorPosicao = Vector3.zero;
         bool encontrouLugarLivre = false;
@@ -106,17 +116,17 @@ public class FishSpawner : MonoBehaviour
             {
                 melhorPosicao = pontoTeste;
                 encontrouLugarLivre = true;
-                break; 
+                break;
             }
         }
 
         if (encontrouLugarLivre)
         {
-            Instantiate(peixePrefab, melhorPosicao, Quaternion.identity);
+            return Instantiate(peixePrefab, melhorPosicao, Quaternion.identity);
         }
         else
         {
-            Debug.LogWarning("O Spawner não encontrou espaço livre para criar um peixe! Tente diminuir os obstáculos ou aumentar a área.");
+            return Instantiate(peixePrefab, transform.position, Quaternion.identity);
         }
     }
 
@@ -124,7 +134,6 @@ public class FishSpawner : MonoBehaviour
     {
         Gizmos.color = new Color(0, 1, 1, 0.5f);
         Gizmos.DrawCube(transform.position, new Vector3(areaDeSpawn.x, 0.1f, areaDeSpawn.y));
-
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, raioDeEspaco);
     }
