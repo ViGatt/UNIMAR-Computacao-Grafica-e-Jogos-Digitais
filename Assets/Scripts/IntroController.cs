@@ -6,16 +6,20 @@ public class IntroController : MonoBehaviour
     [Header("Componentes da Cena")]
     public ParticleSystem chuvaParticulas;
     public AudioSource chuvaSom;
-    public Light sol; 
-    public GameManager gameManager; 
+    public Light sol;
+    public GameManager gameManager;
+
+    public GameObject interfaceDoJogo;
+
+    public PlayerClickHandler sistemaDeCliques;
 
     [Header("Configuração da Intro")]
-    public float duracaoDaChuva = 5f; 
-    public float duracaoDoAmanhecer = 3f; 
+    public float duracaoDaChuva = 5f;
+    public float duracaoDoAmanhecer = 3f;
 
     [Header("Cores do Céu")]
     public Color corDaNoite = new Color(0.2f, 0.2f, 0.3f);
-    public Color corDoDia = new Color(1f, 0.95f, 0.8f);    
+    public Color corDoDia = new Color(1f, 0.95f, 0.8f);
 
     void Start()
     {
@@ -24,16 +28,25 @@ public class IntroController : MonoBehaviour
             gameManager.enabled = false;
         }
 
+        if (interfaceDoJogo != null)
+        {
+            interfaceDoJogo.SetActive(false);
+        }
+
+        if (sistemaDeCliques != null)
+        {
+            sistemaDeCliques.enabled = false; 
+        }
+
         StartCoroutine(SequenciaDeIntro());
     }
 
     IEnumerator SequenciaDeIntro()
     {
-
         if (sol != null)
         {
             sol.color = corDaNoite;
-            sol.intensity = 0.2f; 
+            sol.intensity = 0.2f;
         }
 
         if (chuvaParticulas != null) chuvaParticulas.Play();
@@ -44,7 +57,6 @@ public class IntroController : MonoBehaviour
         }
 
         yield return new WaitForSeconds(duracaoDaChuva);
-
 
         if (chuvaParticulas != null) chuvaParticulas.Stop();
 
@@ -67,7 +79,7 @@ public class IntroController : MonoBehaviour
                 chuvaSom.volume = Mathf.Lerp(volumeInicial, 0f, progresso);
             }
 
-            yield return null; 
+            yield return null;
         }
 
         if (chuvaSom != null) chuvaSom.Stop();
@@ -77,6 +89,16 @@ public class IntroController : MonoBehaviour
         if (gameManager != null)
         {
             gameManager.enabled = true;
+        }
+
+        if (interfaceDoJogo != null)
+        {
+            interfaceDoJogo.SetActive(true);
+        }
+
+        if (sistemaDeCliques != null)
+        {
+            sistemaDeCliques.enabled = true; 
         }
 
         Destroy(gameObject);

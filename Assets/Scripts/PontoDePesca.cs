@@ -28,7 +28,12 @@ public class PontoDePesca : MonoBehaviour
     {
         if (ehEspecial)
         {
-            Invoke("SumirSozinho", tempoDeVida);
+            float variacao = Random.Range(-1.0f, 2.0f);
+            float tempoReal = tempoDeVida + variacao;
+
+            if (tempoReal < 2f) tempoReal = 2f;
+
+            Invoke("SumirSozinho", tempoReal);
         }
     }
 
