@@ -81,7 +81,7 @@ public class GameManager : MonoBehaviour
 
         if (Score.Instance != null)
         {
-            textoPontuacaoFinal.text = "Pontuação Final: " + Score.Instance.GetScore();
+            textoPontuacaoFinal.text = "Pontuacao Final: " + Score.Instance.GetScore();
         }
 
         Debug.Log("O JOGO TERMINOU!");
