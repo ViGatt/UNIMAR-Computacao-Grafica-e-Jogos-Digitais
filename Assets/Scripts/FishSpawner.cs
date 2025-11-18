@@ -11,10 +11,16 @@ public class FishSpawner : MonoBehaviour
     [SerializeField] private Vector2 areaDeSpawn = new Vector2(20f, 15f);
 
     [Header("Peixe Especial")]
-    [Tooltip("O prefab do peixe que dá tempo.")]
     [SerializeField] private GameObject peixeEspecialPrefab;
-    [Tooltip("O tempo (em segundos) entre cada spawn do peixe especial.")]
     [SerializeField] private float intervaloSpawnEspecial = 5f;
+
+    [Header("Verificação de Obstáculos")]
+    [Tooltip("Quais camadas são consideradas obstáculos (pedras, troncos, etc).")]
+    [SerializeField] private LayerMask camadaObstaculos;
+    [Tooltip("O espaço vazio necessário ao redor do peixe.")]
+    [SerializeField] private float raioDeEspaco = 1f;
+    [Tooltip("Quantas vezes tentar achar um lugar livre antes de desistir.")]
+    [SerializeField] private int maxTentativas = 10;
 
     void Awake()
     {
@@ -42,21 +48,35 @@ public class FishSpawner : MonoBehaviour
     {
         while (true)
         {
-            yield return new WaitForSeconds(intervaloSpawnEspecial);
-
-            if (GameManager.Instance != null && !GameManager.Instance.JogoTerminou)
+            if (GameManager.Instance == null || !GameManager.Instance.JogoTerminou)
             {
                 SpawnPeixe(peixeEspecialPrefab);
             }
+            yield return new WaitForSeconds(intervaloSpawnEspecial);
         }
     }
 
-    public void PeixeFoiPescado()
+    public void PeixeEspecialFoiPescado()
     {
-        StartCoroutine(RespawnPeixeComDelay(5f));
+        StartCoroutine(RespawnPeixeEspecialComDelay());
     }
 
-    private IEnumerator RespawnPeixeComDelay(float delay)
+    private IEnumerator RespawnPeixeEspecialComDelay()
+    {
+        yield return new WaitForSeconds(intervaloSpawnEspecial);
+
+        if (GameManager.Instance != null && !GameManager.Instance.JogoTerminou)
+        {
+            SpawnPeixe(peixeEspecialPrefab);
+        }
+    }
+
+    public void PeixeNormalFoiPescado()
+    {
+        StartCoroutine(RespawnPeixeNormalComDelay(5f));
+    }
+
+    private IEnumerator RespawnPeixeNormalComDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
         SpawnPeixeNormal();
@@ -73,16 +93,39 @@ public class FishSpawner : MonoBehaviour
     {
         if (peixePrefab == null) return;
 
-        float xPos = Random.Range(-areaDeSpawn.x / 2, areaDeSpawn.x / 2);
-        float zPos = Random.Range(-areaDeSpawn.y / 2, areaDeSpawn.y / 2);
-        Vector3 posicaoDeSpawn = new Vector3(xPos, 0, zPos) + transform.position;
+        Vector3 melhorPosicao = Vector3.zero;
+        bool encontrouLugarLivre = false;
 
-        Instantiate(peixePrefab, posicaoDeSpawn, Quaternion.identity);
+        for (int i = 0; i < maxTentativas; i++)
+        {
+            float xPos = Random.Range(-areaDeSpawn.x / 2, areaDeSpawn.x / 2);
+            float zPos = Random.Range(-areaDeSpawn.y / 2, areaDeSpawn.y / 2);
+            Vector3 pontoTeste = new Vector3(xPos, 0, zPos) + transform.position;
+
+            if (!Physics.CheckSphere(pontoTeste, raioDeEspaco, camadaObstaculos))
+            {
+                melhorPosicao = pontoTeste;
+                encontrouLugarLivre = true;
+                break; 
+            }
+        }
+
+        if (encontrouLugarLivre)
+        {
+            Instantiate(peixePrefab, melhorPosicao, Quaternion.identity);
+        }
+        else
+        {
+            Debug.LogWarning("O Spawner não encontrou espaço livre para criar um peixe! Tente diminuir os obstáculos ou aumentar a área.");
+        }
     }
 
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = new Color(0, 1, 1, 0.5f);
         Gizmos.DrawCube(transform.position, new Vector3(areaDeSpawn.x, 0.1f, areaDeSpawn.y));
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, raioDeEspaco);
     }
 }

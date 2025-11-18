@@ -1,23 +1,31 @@
+using System.Collections;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class PeixeMovimento : MonoBehaviour
 {
     public enum ComportamentoSePreso { Teleportar, DesaparecerEReaparecer }
 
-    [Header("Configurações de Movimento")]
-    [SerializeField] private float velocidade = 1.5f;
-    [SerializeField] private float areaDeMovimento = 5f;
+    [Header("Configuraï¿½ï¿½es de Movimento")]
+    [SerializeField] private float velocidadeBase = 1.5f;
+    [SerializeField] private float forcaDeAceleracao = 2f;
+    [SerializeField] private float raioDePasseio = 5f;
     [SerializeField] private float velocidadeDeRotacao = 2f;
 
+    [Header("Comportamento")]
+    [Range(0, 1)]
+    [SerializeField] private float chanceDePausar = 0.2f;
+    [SerializeField] private float duracaoMinPausa = 0.5f;
+    [SerializeField] private float duracaoMaxPausa = 2.0f;
+
     [Header("Sistema Anti-Bloqueio")]
-    [Tooltip("O que o peixe faz quando fica preso num canto.")]
     [SerializeField] private ComportamentoSePreso acaoSePreso = ComportamentoSePreso.Teleportar;
-    [Tooltip("Quantos segundos parado para ser considerado preso.")]
     [SerializeField] private float tempoAteSerConsideradoPreso = 3f;
 
-    private Vector3 pontoInicial;
-    private Vector3 novoDestino;
     private Rigidbody rb;
+    private Vector3 novoDestino;
+    private bool estaPausado = false;
+    private float velocidadeAtual;
 
     private float temporizadorDeBloqueio;
     private Vector3 posicaoAnterior;
@@ -25,30 +33,41 @@ public class PeixeMovimento : MonoBehaviour
 
     void Start()
     {
-        pontoInicial = transform.position;
-        posicaoAnterior = transform.position;
         rb = GetComponent<Rigidbody>();
+        posicaoAnterior = transform.position;
         EscolherNovoDestino();
-
         InvokeRepeating("VerificarSeEstaPreso", 1f, 1f);
     }
 
     void FixedUpdate()
     {
-        Vector3 direcao = novoDestino - transform.position;
-        if (direcao != Vector3.zero)
+        if (estaPausado)
         {
-            Quaternion rotacaoAlvo = Quaternion.LookRotation(direcao);
-            rb.rotation = Quaternion.Slerp(transform.rotation, rotacaoAlvo, velocidadeDeRotacao * Time.deltaTime);
+            rb.linearVelocity = Vector3.Lerp(rb.linearVelocity, Vector3.zero, Time.fixedDeltaTime * 2f);
+            return;
         }
 
-        Vector3 novaPosicao = Vector3.MoveTowards(rb.position, novoDestino, velocidade * Time.deltaTime);
-        rb.MovePosition(novaPosicao);
+        Vector3 direcaoParaDestino = (novoDestino - transform.position).normalized;
+
+        if (direcaoParaDestino != Vector3.zero)
+        {
+            Quaternion rotacaoAlvo = Quaternion.LookRotation(direcaoParaDestino);
+            rb.rotation = Quaternion.Slerp(transform.rotation, rotacaoAlvo, velocidadeDeRotacao * Time.fixedDeltaTime);
+        }
+
+        rb.AddForce(transform.forward * forcaDeAceleracao, ForceMode.Acceleration);
+
+        if (rb.linearVelocity.magnitude > velocidadeAtual)
+        {
+            rb.linearVelocity = rb.linearVelocity.normalized * velocidadeAtual;
+        }
     }
 
     void Update()
     {
-        if (Vector3.Distance(transform.position, novoDestino) < 0.5f)
+        if (estaPausado) return;
+
+        if (Vector3.Distance(transform.position, novoDestino) < 1.5f)
         {
             EscolherNovoDestino();
         }
@@ -56,15 +75,30 @@ public class PeixeMovimento : MonoBehaviour
 
     void EscolherNovoDestino()
     {
-        float xAleatorio = Random.Range(-areaDeMovimento, areaDeMovimento);
-        float zAleatorio = Random.Range(-areaDeMovimento, areaDeMovimento);
-        novoDestino = pontoInicial + new Vector3(xAleatorio, 0, zAleatorio);
+        if (Random.value < chanceDePausar)
+        {
+            StartCoroutine(PausarPeixe());
+            return;
+        }
+
+        velocidadeAtual = velocidadeBase * Random.Range(0.8f, 1.2f);
+        Vector3 pontoAleatorio = Random.insideUnitSphere * raioDePasseio;
+        novoDestino = transform.position + pontoAleatorio;
+        novoDestino.y = transform.position.y;
+    }
+
+    IEnumerator PausarPeixe()
+    {
+        estaPausado = true;
+        float tempoDePausa = Random.Range(duracaoMinPausa, duracaoMaxPausa);
+        yield return new WaitForSeconds(tempoDePausa);
+        estaPausado = false;
+        EscolherNovoDestino();
     }
 
     private void VerificarSeEstaPreso()
     {
         float distanciaMovida = Vector3.Distance(transform.position, posicaoAnterior);
-
         if (distanciaMovida < distanciaMinimaParaMover)
         {
             temporizadorDeBloqueio += 1f;
@@ -73,12 +107,10 @@ public class PeixeMovimento : MonoBehaviour
         {
             temporizadorDeBloqueio = 0f;
         }
-
         posicaoAnterior = transform.position;
 
         if (temporizadorDeBloqueio >= tempoAteSerConsideradoPreso)
         {
-            Debug.LogWarning("Peixe '" + name + "' está preso! A acionar plano de fuga.", gameObject);
             PlanoDeFuga();
         }
     }
@@ -86,7 +118,6 @@ public class PeixeMovimento : MonoBehaviour
     private void PlanoDeFuga()
     {
         temporizadorDeBloqueio = 0f;
-
         switch (acaoSePreso)
         {
             case ComportamentoSePreso.Teleportar:
@@ -96,7 +127,7 @@ public class PeixeMovimento : MonoBehaviour
             case ComportamentoSePreso.DesaparecerEReaparecer:
                 if (FishSpawner.Instance != null)
                 {
-                    FishSpawner.Instance.PeixeFoiPescado(); 
+                    FishSpawner.Instance.PeixeNormalFoiPescado();
                 }
                 Destroy(gameObject);
                 break;

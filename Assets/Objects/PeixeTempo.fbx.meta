@@ -1,9 +1,14 @@
 fileFormatVersion: 2
-guid: 3e5ba30f9775fc3489499627b725ab2f
+guid: 48f8b9f6b32db684ca719b9e8b6a3656
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Clownfish_Main
+    second: {fileID: 2100000, guid: ff33c7fce672541f095331a057da80f0, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -158,7 +163,7 @@ ModelImporter:
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 1
+      loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
       loopBlendPositionY: 0

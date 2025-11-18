@@ -12,17 +12,37 @@ public class PontoDePesca : MonoBehaviour
     [SerializeField] private AudioClip somDeClique;
 
     [Header("Configurações Especiais")]
-    [Tooltip("Marque isto se for um peixe especial (dá tempo, não inicia minigame).")]
     [SerializeField] private bool ehEspecial = false;
-    [Tooltip("Segundos para adicionar ao timer (apenas se 'ehEspecial' for true).")]
     [SerializeField] private float tempoParaAdicionar = 15f;
+
+    [Tooltip("Se for especial, quantos segundos ele fica na tela antes de sumir.")]
+    [SerializeField] private float tempoDeVida = 5f;
+
+    private void Start()
+    {
+        if (ehEspecial)
+        {
+            Invoke("SumirSozinho", tempoDeVida);
+        }
+    }
+
+    private void SumirSozinho()
+    {
+        if (FishSpawner.Instance != null)
+        {
+            FishSpawner.Instance.PeixeEspecialFoiPescado();
+        }
+
+
+        Destroy(gameObject);
+    }
 
     public void IniciarPesca()
     {
-        if (GameManager.Instance != null && GameManager.Instance.JogoTerminou)
-        {
-            return;
-        }
+        if (GameManager.Instance != null && GameManager.Instance.JogoTerminou) return;
+
+        if (efeitoDeCliquePrefab != null) Instantiate(efeitoDeCliquePrefab, transform.position, Quaternion.identity);
+        if (somDeClique != null) AudioSource.PlayClipAtPoint(somDeClique, transform.position);
 
         if (ehEspecial)
         {
@@ -31,13 +51,9 @@ public class PontoDePesca : MonoBehaviour
                 GameManager.Instance.AdicionarTempo(tempoParaAdicionar);
             }
 
-            if (efeitoDeCliquePrefab != null)
+            if (FishSpawner.Instance != null)
             {
-                Instantiate(efeitoDeCliquePrefab, transform.position, Quaternion.identity);
-            }
-            if (somDeClique != null)
-            {
-                AudioSource.PlayClipAtPoint(somDeClique, transform.position);
+                FishSpawner.Instance.PeixeEspecialFoiPescado();
             }
 
             Destroy(gameObject);
@@ -46,17 +62,8 @@ public class PontoDePesca : MonoBehaviour
         {
             if (FishingMinigame.Instance == null)
             {
-                Debug.LogError("ERRO: O peixe tentou iniciar o minigame, mas não encontrou uma Instância do FishingMinigame.");
+                Debug.LogError("ERRO: FishingMinigame não encontrado.");
                 return;
-            }
-
-            if (efeitoDeCliquePrefab != null)
-            {
-                Instantiate(efeitoDeCliquePrefab, transform.position, Quaternion.identity);
-            }
-            if (somDeClique != null)
-            {
-                AudioSource.PlayClipAtPoint(somDeClique, transform.position);
             }
 
             gameObject.SetActive(false);
@@ -72,7 +79,7 @@ public class PontoDePesca : MonoBehaviour
 
             if (FishSpawner.Instance != null)
             {
-                FishSpawner.Instance.PeixeFoiPescado();
+                FishSpawner.Instance.PeixeNormalFoiPescado();
             }
 
             Destroy(gameObject);
